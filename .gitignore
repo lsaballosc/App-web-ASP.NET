@@ -1,0 +1,23 @@
+# Archivos de Visual Studio
+.vs/
+*.user
+*.suo
+
+# Carpetas de compilación
+bin/
+obj/
+Debug/
+Release/
+
+# Configuración secreta
+*.config.user
+.env
+Web.config
+
+# Publicaciones
+*.publish.xml
+
+# NuGet
+packages/
+*.nupkg
+
