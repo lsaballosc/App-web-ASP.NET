@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
 using System.Web.Services.Description;
-
+using CapaPresentacionTienda.Filter;
 
 
 
@@ -267,7 +267,8 @@ namespace CapaPresentacionTienda.Controllers
 
             return Json(new { lista = olista }, JsonRequestBehavior.AllowGet);
         }
-
+        [ValidarSession]
+        [Authorize]
         public ActionResult Carrito()
         {
             return View();
@@ -550,6 +551,8 @@ namespace CapaPresentacionTienda.Controllers
 
 
         //}
+        [ValidarSession]
+        [Authorize]
 
         public async Task<ActionResult> PagoEfectuado()
         {
@@ -589,7 +592,50 @@ namespace CapaPresentacionTienda.Controllers
 
 
 
+        // metodo historial de compras
 
+        [ValidarSession]
+        [Authorize]
+        public ActionResult MisCompras()
+        {
+
+            try
+            {
+                int idcliente = ((Cliente)Session["Cliente"]).IdCliente;
+
+                List<DetalleVenta> lista = new List<DetalleVenta>();
+
+                bool conversion;
+
+                lista = new CN_Venta().ListarCompras(idcliente).Select(oc => new DetalleVenta()
+                {
+                    oProducto = new Producto()
+                    {
+                    
+                        Nombre = oc.oProducto.Nombre,
+                       
+                        Precio = oc.oProducto.Precio,
+                     
+                        Base64 = CN_Recursos.ConvertirBase64(Path.Combine(oc.oProducto.RutaImagen, oc.oProducto.NombreImagen), out conversion),
+                        Extension = Path.GetExtension(oc.oProducto.NombreImagen)
+
+                    },
+                    Cantidad = oc.Cantidad,
+                    Total = oc.Total,
+                    IdTransaccion = oc.IdTransaccion
+
+
+
+
+                }).ToList();
+                return View(lista);
+            }
+            catch (Exception ex)
+            {
+               return View(new List<DetalleVenta>()); // Retorna una lista vacía en caso de error
+            }
+
+        }// fin del metodo
 
 
 
