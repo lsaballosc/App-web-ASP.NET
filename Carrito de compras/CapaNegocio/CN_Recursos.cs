@@ -65,7 +65,7 @@ namespace CapaNegocio
                 var servidorSmtp = new SmtpClient("smtp.gmail.com", 587)
                 //si da error probar poner la contraseña pegada sin espacios ni comillas
                 {
-                    Credentials = new NetworkCredential("jzelacrochet@gmail.com", "mshigfbajjrvtpwr"), // configurar las credenciales del servidor SMTP de Gmail
+                    Credentials = new NetworkCredential("jzelacrochet@gmail.com", "cbhijrwjyjkvdjot"), // configurar las credenciales del servidor SMTP de Gmail
                     // Configurar las credenciales del servidor SMTP de Gmail
                     Host = "smtp.gmail.com",
                     Port = 587,

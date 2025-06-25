@@ -26,6 +26,7 @@ namespace CapaNegocio
         // metodo para crear solicitud de pago
         public async Task<Response_Paypal<Response_Checkout>> CrearSolicitud(Checkout_Order orden)
         {
+            //creo una variable de tipo response_paypal que es una clase generica que maneja las respuestas de paypal
             Response_Paypal<Response_Checkout> response_paypal = new Response_Paypal<Response_Checkout>();
 
 

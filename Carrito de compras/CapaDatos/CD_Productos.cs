@@ -272,5 +272,78 @@ namespace CapaDatos
             return respuesta; // Retorno true si la edición fue exitosa, false si hubo un error
         }// fin del método
 
+
+
+        public List<Producto> ObtenerProductos(int idMarca, int idCategoria, int nroPagina, int obtenerRegistros, out int TotalRegistros, out int TotalPaginas)
+        {
+            List<Producto> lista = new List<Producto>();
+            TotalRegistros = 0;
+            TotalPaginas = 0;
+
+            try
+            {
+               
+                using (SqlConnection oconexion = new SqlConnection(Conection.cn)) 
+
+                {
+
+                   
+                    SqlCommand cmd = new SqlCommand("sp_ObtenerProductos", oconexion);
+                    cmd.Parameters.AddWithValue("idMarca", idMarca);
+                    cmd.Parameters.AddWithValue("idCategoria", idCategoria);// Nombres del usuario, que se almacenará en la base de datos
+                    cmd.Parameters.AddWithValue("nroPagina", nroPagina);
+                    cmd.Parameters.AddWithValue("obtenerRegistros", obtenerRegistros);// Nombres del usuario, que se almacenará en la base de datos
+
+                    cmd.Parameters.Add("TotalRegistros", SqlDbType.Int).Direction = ParameterDirection.Output;// Indico que este parámetro es de salida y será un entero
+                    cmd.Parameters.Add("TotalPaginas", SqlDbType.Int).Direction = ParameterDirection.Output;// Indico que este parámetro es de salida y será un string de hasta 500 caracteres
+                    cmd.CommandType = CommandType.StoredProcedure;// Indico que es un procedimiento almacenado
+
+                 
+
+                    oconexion.Open();
+                
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                       
+                        while (reader.Read())
+                        {
+                            lista.Add(new Producto() 
+                            {
+                            
+                                IdProducto = Convert.ToInt32(reader["IdProducto"]),
+                                Nombre = reader["Nombre"].ToString(),
+                                Descripcion = reader["Descripcion"].ToString(),
+                                Activo = Convert.ToBoolean(reader["Activo"]),
+                                oMarca = new Marca()
+                                {
+                                    IdMarca = Convert.ToInt32(reader["IdMarca"]),
+                                    Descripcion = reader["DesMarca"].ToString(),
+                                },
+                                oCategoria = new Categoria()
+                                {
+                                    idCategoria = Convert.ToInt32(reader["idCategoria"]),
+                                    Descripcion = reader["DesCategoria"].ToString(),
+                                },
+                                Precio = Convert.ToDecimal(reader["Precio"], new CultureInfo("es-CR")),
+                                Stock = Convert.ToInt32(reader["Stock"]),
+                                RutaImagen = reader["RutaImagen"].ToString(),
+                                NombreImagen = reader["NombreImagen"].ToString()
+                            });
+
+                        }
+                    }
+                    TotalRegistros = Convert.ToInt32(cmd.Parameters["TotalRegistros"].Value);
+                    TotalPaginas = Convert.ToInt32( cmd.Parameters["TotalPaginas"].Value); 
+                }
+            }
+           
+            catch
+            {
+                lista = new List<Producto>();
+
+            }
+            return lista;
+        }// fin del metodo Listar
+
     }
 }

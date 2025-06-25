@@ -81,13 +81,41 @@ namespace CapaPresentacionTienda.Controllers
         }
 
         [HttpPost]
-        public JsonResult ListarProducto(int idcategoria, int idmarca)
+        public JsonResult ListarProducto(int idcategoria, int idmarca, int nroPagina)
         {
             List<Producto> lista = new List<Producto>();
 
             bool conversion;
 
-            lista = new CN_Producto().Listar().Select(p => new Producto()
+            //lista = new CN_Producto().Listar().Select(p => new Producto()
+            //{
+            //    IdProducto = p.IdProducto,
+            //    Nombre = p.Nombre,
+            //    Descripcion = p.Descripcion,
+            //    oMarca = p.oMarca,
+            //    oCategoria = p.oCategoria,
+            //    Precio = p.Precio,
+            //    Stock = p.Stock,
+            //    RutaImagen = p.RutaImagen,
+            //    Base64 = CN_Recursos.ConvertirBase64(Path.Combine(p.RutaImagen, p.NombreImagen), out conversion),
+            //    Extension = Path.GetExtension(p.NombreImagen),
+            //    Activo = p.Activo
+
+
+
+            //}).Where(p =>
+            //    p.oCategoria.idCategoria == (idcategoria == 0 ? p.oCategoria.idCategoria : idcategoria) &&
+            //    p.oMarca.IdMarca == (idmarca == 0 ? p.oMarca.IdMarca : idmarca) &&
+            //    p.Stock > 0 && p.Activo == true
+
+
+
+
+            //).ToList();
+
+            int _totalRegistros;
+            int _totalPaginas;
+            lista = new CN_Producto().ObtenerProductos(idmarca,idcategoria, nroPagina, 8, out _totalRegistros, out _totalPaginas).Select(p => new Producto()
             {
                 IdProducto = p.IdProducto,
                 Nombre = p.Nombre,
@@ -103,18 +131,17 @@ namespace CapaPresentacionTienda.Controllers
 
 
 
-            }).Where(p =>
-                p.oCategoria.idCategoria == (idcategoria == 0 ? p.oCategoria.idCategoria : idcategoria) &&
-                p.oMarca.IdMarca == (idmarca == 0 ? p.oMarca.IdMarca : idmarca) &&
-                p.Stock > 0 && p.Activo == true
+            }).ToList();
 
 
 
 
-            ).ToList();
 
 
-            var jsonresult = Json(new { data = lista }, JsonRequestBehavior.AllowGet);
+
+
+
+            var jsonresult = Json(new { data = lista, totalRegistros = _totalRegistros, totalPaginas = _totalPaginas }, JsonRequestBehavior.AllowGet);
             jsonresult.MaxJsonLength = int.MaxValue;
 
             return jsonresult;
@@ -267,8 +294,9 @@ namespace CapaPresentacionTienda.Controllers
 
             return Json(new { lista = olista }, JsonRequestBehavior.AllowGet);
         }
+
         [ValidarSession]
-        [Authorize]
+      
         public ActionResult Carrito()
         {
             return View();
@@ -552,7 +580,7 @@ namespace CapaPresentacionTienda.Controllers
 
         //}
         [ValidarSession]
-        [Authorize]
+      
 
         public async Task<ActionResult> PagoEfectuado()
         {
@@ -595,7 +623,7 @@ namespace CapaPresentacionTienda.Controllers
         // metodo historial de compras
 
         [ValidarSession]
-        [Authorize]
+       
         public ActionResult MisCompras()
         {
 

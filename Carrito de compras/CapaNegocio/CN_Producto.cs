@@ -27,6 +27,10 @@ namespace CapaNegocio
 
         }
         // fin del metodo listar
+        public List<Producto> ObtenerProductos(int idMarca, int idCategoria, int nroPagina, int obtenerRegistros, out int TotalRegistros, out int TotalPaginas)
+        {
+            return objProducto.ObtenerProductos(idMarca, idCategoria, nroPagina, obtenerRegistros, out TotalRegistros, out TotalPaginas);
+        }
 
 
 
@@ -127,6 +131,9 @@ namespace CapaNegocio
         {
             return objProducto.Eliminar(idCategoria, out Mensaje); // Llamo al método de la capa de datos para eliminar el usuario y obtengo el mensaje de error si ocurre
         }
+
+
+
 
 
     }
