@@ -344,9 +344,10 @@
                         success: function(data) {
                             // se traen los datos como lo devuelve el metodo del mantenedor
                             $("#img_producto").LoadingOverlay("hide");
-                            if (data.conversion) {
-                                $("#img_producto").attr({ "src": "data:image/" + data.extension + ";base64," + data.textoBase64 });
-                            }
+                            //if (data.conversion) {
+                            //    $("#img_producto").attr({ "src": "data:image/" + data.extension + ";base64," + data.textoBase64 });
+                            //}
+                            $("#img_producto").attr({ "src": data.ruta });
                     },
                     error: function (error) {
                         $("#img_producto").LoadingOverlay("hide");
@@ -359,6 +360,14 @@
                     }
 
                 })
+
+                //console.log("Ruta de la imagen:", json.RutaImagen);
+                //if (json.RutaImagen) {
+                //    $("#img_producto").attr("src", json.RutaImagen);
+                //} else {
+                //    $("#img_producto").removeAttr("src");
+                //}
+
 
 
             }

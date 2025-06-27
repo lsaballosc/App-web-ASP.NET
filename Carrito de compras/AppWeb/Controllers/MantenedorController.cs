@@ -7,6 +7,7 @@ using System.Configuration;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
 
@@ -17,7 +18,7 @@ namespace AppWeb.Controllers
     public class MantenedorController : Controller
     {
         // GET: Mantenedor
-
+        private CN_FirBase oCN_FirBase = new CN_FirBase();
         public ActionResult Categoria()
         {
             return View();
@@ -159,9 +160,9 @@ namespace AppWeb.Controllers
 
         [HttpPost]
         // Este metodo recibe un objeto Producto en formato string y un archivo de imagen
-        public JsonResult GuardarProducto(string obj, HttpPostedFileBase archivoImagen)
+        public async Task<JsonResult> GuardarProducto(string obj, HttpPostedFileBase archivoImagen)
         {
-           // object resultado;
+            // object resultado;
             string mensaje = string.Empty;
             bool operacion_Exitosa = true;
             bool guardarImagenExitosa = true;
@@ -178,9 +179,9 @@ namespace AppWeb.Controllers
             }
             else
             {
-               // operacion_Exitosa = false;
+                // operacion_Exitosa = false;
                 //mensaje = "No se ha podido ingresar debido a que el precio no está en el formato correcto";
-               return Json(new { operacionExitosa = false, mensaje = "El formato del precio debe ser ##.## o ####.##,#" }, JsonRequestBehavior.AllowGet);
+                return Json(new { operacionExitosa = false, mensaje = "El formato del precio debe ser ##.## o ####.##,#" }, JsonRequestBehavior.AllowGet);
             }
             if (oProducto.IdProducto == 0)
             {
@@ -209,23 +210,27 @@ namespace AppWeb.Controllers
             {
                 if (archivoImagen != null)
                 {
-                    string ruta_guardar = ConfigurationManager.AppSettings["ServidorFotos"];
+                    //string ruta_guardar = ConfigurationManager.AppSettings["ServidorFotos"];
+                   
                     string extension = Path.GetExtension(archivoImagen.FileName);
                     // el nombre será el id del producto + la extension del archivo
                     string nomeArchivo = string.Concat(oProducto.IdProducto.ToString(), extension);
+                    string ruta_guardar = await oCN_FirBase.SubirStorage(archivoImagen.InputStream, nomeArchivo);
 
-                    try
-                    {
-                        archivoImagen.SaveAs(Path.Combine(ruta_guardar, nomeArchivo));
+                    
+                    //try
+                    //{
+                    //    archivoImagen.SaveAs(Path.Combine(ruta_guardar, nomeArchivo));
 
-                    }
-                    catch (Exception ex)
-                    {
-                        // Si ocurre un error al guardar la imagen, cambio la variable de operacion exitosa a false
-                        operacion_Exitosa = false;
-                        mensaje = "Error al guardar la imagen: " + ex.Message;
-                    }
+                    //}
+                    //catch (Exception ex)
+                    //{
+                    //    // Si ocurre un error al guardar la imagen, cambio la variable de operacion exitosa a false
+                    //    operacion_Exitosa = false;
+                    //    mensaje = "Error al guardar la imagen: " + ex.Message;
+                    //}
 
+                    guardarImagenExitosa = ruta_guardar != "" ? true : false;
 
                     if (guardarImagenExitosa)
                     {
@@ -239,13 +244,138 @@ namespace AppWeb.Controllers
                         mensaje = "No se pudo guardar la imagen del producto.";
                         operacion_Exitosa = false;
                     }
+
+                    //try
+                    //{
+                    //    string extension = Path.GetExtension(archivoImagen.FileName);
+                    //    string nombreFinal = $"{oProducto.IdProducto}{extension}";
+
+                    //    var driveHelper = new GoogleDriveHelper();
+                    //    string urlImagen = driveHelper.SubirArchivo(archivoImagen, nombreFinal);
+
+                    //    oProducto.RutaImagen = urlImagen;
+                    //    oProducto.NombreImagen = nombreFinal;
+
+                    //    bool resp = new CN_Producto().GuardarDatosImagen(oProducto, out mensaje);
+                    //}
+                    //catch (Exception ex)
+                    //{
+                    //    operacion_Exitosa = false;
+                    //    mensaje = "Error al subir la imagen a Drive: " + ex.Message;
+                    //}
+
+
+
                 }
 
             }
             return Json(new { operacionExitosa = operacion_Exitosa, idGenerado = oProducto.IdProducto, mensaje = mensaje }, JsonRequestBehavior.AllowGet);
         }
 
-        //
+
+
+
+        //intento de guardar un producto con imagen en Drive
+        //[HttpPost]
+        //public JsonResult GuardarProducto(string obj, HttpPostedFileBase archivoImagen)
+        //{
+        //    string mensaje = string.Empty;
+        //    bool operacion_Exitosa = true;
+
+        //    Producto oProducto = JsonConvert.DeserializeObject<Producto>(obj);
+
+        //    // Validar precio
+        //    decimal precio;
+        //    if (decimal.TryParse(oProducto.PrecioTexto, NumberStyles.AllowDecimalPoint | NumberStyles.AllowThousands, new CultureInfo("es-CR"), out precio))
+        //    {
+        //        oProducto.Precio = precio;
+        //    }
+        //    else
+        //    {
+        //        return Json(new { operacionExitosa = false, mensaje = "El formato del precio debe ser ##.## o ####.##,#" }, JsonRequestBehavior.AllowGet);
+        //    }
+
+        //    // Registrar o editar
+        //    if (oProducto.IdProducto == 0)
+        //    {
+        //        int idGenerado = new CN_Producto().Registrar(oProducto, out mensaje);
+        //        if (idGenerado > 0)
+        //        {
+        //            oProducto.IdProducto = idGenerado;
+        //        }
+        //        else
+        //        {
+        //            operacion_Exitosa = false;
+        //        }
+        //    }
+        //    else
+        //    {
+        //        // Obtener datos actuales del producto
+        //        var productoBD = new CN_Producto().Listar().FirstOrDefault(p => p.IdProducto == oProducto.IdProducto);
+
+        //        // Si no se sube imagen nueva, conservar la existente
+        //        if (archivoImagen == null && productoBD != null)
+        //        {
+        //            oProducto.RutaImagen = productoBD.RutaImagen;
+        //            oProducto.NombreImagen = productoBD.NombreImagen;
+        //        }
+
+        //        operacion_Exitosa = new CN_Producto().Editar(oProducto, out mensaje);
+        //    }
+
+        //    // Subir imagen a Drive si todo salió bien
+        //    if (operacion_Exitosa)
+        //    {
+        //        if (archivoImagen != null)
+        //        {
+        //            string extension = Path.GetExtension(archivoImagen.FileName);
+        //            string nombreFinal = string.Concat(oProducto.IdProducto.ToString(), extension);
+
+        //            try
+        //            {
+        //                var driveHelper = new GoogleDriveHelper();
+        //                string urlImagen = driveHelper.SubirArchivo(archivoImagen, nombreFinal);
+
+        //                oProducto.RutaImagen = urlImagen;
+        //                oProducto.NombreImagen = nombreFinal;
+
+        //                bool resp = new CN_Producto().GuardarDatosImagen(oProducto, out mensaje);
+
+        //                if (!resp)
+        //                {
+        //                    operacion_Exitosa = false;
+        //                    mensaje = "No se pudo guardar la información de la imagen en la base de datos.";
+        //                }
+        //            }
+        //            catch (Exception ex)
+        //            {
+        //                operacion_Exitosa = false;
+        //                mensaje = "Error al subir la imagen a Drive: " + ex.Message;
+        //            }
+        //        }
+        //    }
+
+        //    return Json(new
+        //    {
+        //        operacionExitosa = operacion_Exitosa,
+        //        idGenerado = oProducto.IdProducto,
+        //        mensaje = mensaje
+        //    }, JsonRequestBehavior.AllowGet);
+        //}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         //metodo que va a devolver una cadena en base 64 de la imagen del producto
         [HttpPost]
@@ -256,14 +386,17 @@ namespace AppWeb.Controllers
             // creo un objeto de la capa de negocio para acceder a los metodos de la capa de negocio y obtener el producto por su id
             Producto oProducto = new CN_Producto().Listar().Where(p=> p.IdProducto == id).FirstOrDefault();
             // si el producto es nulo, retorno un mensaje de error, sino, convierto la imagen a base 64, como la ruta y el nombre de la imagen del producto
-            string textoBase64 = CN_Recursos.ConvertirBase64(Path.Combine(oProducto.RutaImagen, oProducto.NombreImagen),out conversion);
+            //string textoBase64 = CN_Recursos.ConvertirBase64(Path.Combine(oProducto.RutaImagen, oProducto.NombreImagen),out conversion);
 
-            return Json(new
-            {
-                conversion = conversion,
-                textoBase64 = textoBase64,
-                extension = Path.GetExtension(oProducto.NombreImagen)
-            },JsonRequestBehavior.AllowGet );
+            //return Json(new
+            //{
+            //    conversion = conversion,
+            //    textoBase64 = textoBase64,
+            //    extension = Path.GetExtension(oProducto.NombreImagen)
+            //},JsonRequestBehavior.AllowGet );
+
+
+            return Json(new { ruta = oProducto.RutaImagen }, JsonRequestBehavior.AllowGet);
         }
 
         public JsonResult EliminarProducto(int id)

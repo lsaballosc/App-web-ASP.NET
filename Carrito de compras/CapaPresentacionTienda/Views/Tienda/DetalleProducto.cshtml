@@ -11,9 +11,12 @@
             <!-- Imagen del producto -->
             <div class="col-md-5">
                 <div class="border rounded shadow-sm p-2 bg-white">
-                    <img class="img-fluid rounded"
+                    @*<img class="img-fluid rounded"
                          src="data:image/@Html.DisplayTextFor(m => m.Extension);base64,@Html.DisplayTextFor(m => m.Base64)"
-                         alt="@Html.DisplayTextFor(m => m.Nombre)" />
+                         alt="@Html.DisplayTextFor(m => m.Nombre)" />*@
+
+                    <img class="img-fluid rounded"
+                         src="@Html.DisplayTextFor(m => m.RutaImagen)" />
                 </div>
             </div>
 
